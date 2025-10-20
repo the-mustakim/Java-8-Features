@@ -1,0 +1,50 @@
+package Optional;
+
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+public class Sample1 {
+    public static void main(String[] args) {
+        Optional<String> name = getName(2);
+
+        // 1) Safe print if present
+        name.ifPresent(System.out::println);
+
+        // 2) Default value (cheap)
+        String nameToBeUsed = name.orElse("NA");
+        System.out.println("orElse: " + nameToBeUsed);
+
+        // 3) Lazy default (expensive computation only if empty)
+        String nameLazy = name.orElseGet(() -> computeDefaultName());
+        System.out.println("orElseGet: " + nameLazy);
+
+        // 4) Throw if not present
+        try {
+            String mustHave = name.orElseThrow(() -> new NoSuchElementException("Name not found for id"));
+            System.out.println("mustHave: " + mustHave);
+        } catch (NoSuchElementException ex) {
+            System.out.println("Caught: " + ex.getMessage());
+        }
+
+        // 5) Transform if present
+        String upper = name.map(String::toUpperCase).orElse("NA");
+        System.out.println("upper: " + upper);
+
+        // 6) Filter then map
+        String filtered = name.filter(n -> n.length() > 3)
+                .map(n -> "LongName:" + n)
+                .orElse("ShortOrMissing");
+        System.out.println("filtered: " + filtered);
+    }
+
+    private static String computeDefaultName() {
+        // pretend expensive work (db call, remote service, etc.)
+        return "LazyDefault";
+    }
+
+    private static Optional<String> getName(int id) {
+        String name = null; // simulate DB miss
+        // If name may be null, always return Optional.ofNullable(name)
+        return Optional.ofNullable(name);
+    }
+}
